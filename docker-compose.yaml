@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  laravel-app:
+    build: .
+    container_name: app_laravel
+    ports:
+      - "80:80"
+    volumes:
+      - ./projs:/usr/share/nginx/html
+      - ./nginx_conf:/etc/nginx/conf.d
+
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  mysql-app:
+    image: mysql:5.7.22
+    container_name: mysql_5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - .docker/dbdata:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: laravel
+    networks:
+      - app-network
+    restart: unless-stopped
+    
+  filebrowser:
+    image: filebrowser/filebrowser:v2
+    container_name: filebrowser
+    ports:
+      - "8888:80"
+    volumes:
+      - ./nginx_conf:/srv/_nginx_conf
+      - /mnt/data/volume/app.filebrowser/data/filebrowser.json:/.filebrowser.json
+      - /mnt/data/volume/app.filebrowser/data/database.db:/.database.db
+      - /mnt/data/volume/app.filebrowser/data/srv:/srv
+      - ./projs/apps:/srv/_apps
+
+networks:
+  app-network:
+    driver: bridge
